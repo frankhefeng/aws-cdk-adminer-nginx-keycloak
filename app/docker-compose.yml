@@ -1,0 +1,31 @@
+version: '3'
+networks:
+  adminer-network:
+    driver: bridge
+services:
+    nginx:
+        build: ./nginx
+        command: ["/bin/bash", "/opt/command.sh"]
+        environment:
+            ADMINER_HOST: "adminer"
+            VOUCH_HOST: "vouch-proxy"
+        ports:
+            - "8888:80"
+        links:
+            - adminer:adminer
+        depends_on:
+            - adminer
+        networks:
+            - adminer-network
+    vouch-proxy:
+        build: ./vouch
+        restart: always
+        ports:
+            - 9090:9090
+        networks:
+            - adminer-network
+    adminer:
+        image: adminer:fastcgi
+        restart: always
+        networks:
+            - adminer-network

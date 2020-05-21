@@ -1,0 +1,34 @@
+vouch:
+  domains:
+    - <yourdomain.com>
+  allowAllUsers: true
+  # logLevel: debug
+  testing: false
+
+  cookie: 
+    name: VouchCookie
+    domain: <yourdomain.com>
+    secure: true
+    httpOnly: true
+
+  session:
+    name: VouchSession
+    key: <random_string>
+
+  headers:
+    jwt: X-Vouch-Token
+    querystring: access_token
+    redirect: X-Vouch-Requested-URI
+
+oauth:
+  provider: oidc
+  client_id: <oidc_client_id>
+  client_secret: <some_secret>
+  auth_url: https://<keycloak.yourdomain.com>/auth/realms/yourrealm/protocol/openid-connect/auth
+  token_url: https://<keycloak.yourdomain.com>/auth/realms/yourrealm/protocol/openid-connect/token
+  user_info_url: https://<keycloak.yourdomain.com>/auth/realms/yourrealm/protocol/openid-connect/userinfo
+  scopes:
+    - openid
+    - email
+    - profile
+  callback_url: https://<login.yourdomain.com>/auth
