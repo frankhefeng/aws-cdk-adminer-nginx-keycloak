@@ -3,8 +3,8 @@ This project deploys [Adminer](https://www.adminer.org/) on Amazon Fargate prote
 
 ## How to use
 1. Have a domain hosted in Route53, also a wildcard SSL/TLS certificate for this domain created in ACM.
-2. <Optional> Deploy KeyCloak to setup SSO. Please refer to  [aws-cdk-fargate-keycloak](https://github.com/frankhefeng/aws-cdk-fargate-keycloak)
-3. Have OIDC Endpoint information ready, and update vouch/config.yml accordingly.  Especially these items:
+2. [Optional] Deploy [KeyCloak](https://www.keycloak.org/) to setup SSO. Please refer to  [aws-cdk-fargate-keycloak](https://github.com/frankhefeng/aws-cdk-fargate-keycloak)
+3. Have OIDC Endpoint information ready, and update `vouch/config.yml` accordingly.  Especially these items:
     - yourdomain.com
     - session.key
     - oauth.client_id
@@ -15,4 +15,4 @@ This project deploys [Adminer](https://www.adminer.org/) on Amazon Fargate prote
     - oauth.callback_url
 
 ## Deploy
-domainName=yourdomain.com adminerSubDomainName=adminer vouchSubDomainName=login acmARN=... cdk deploy
+`domainName=yourdomain.com adminerSubDomainName=adminer vouchSubDomainName=login acmARN=... cdk deploy`
