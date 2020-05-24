@@ -48,7 +48,10 @@ export class AdminerSsoStack extends cdk.Stack {
     const adminerLoadBalancer = new elbv2.NetworkLoadBalancer(this, 'AdminerLoadBalancer', {
       vpc: vpc,
     });
-    const adminerTaskDefinition = new ecs.FargateTaskDefinition(this, 'AdminerTaskDef', {});
+    const adminerTaskDefinition = new ecs.FargateTaskDefinition(this, 'AdminerTaskDef', {
+      memoryLimitMiB: 1024,
+      cpu: 512,
+    });
     const adminerLogDriver = new ecs.AwsLogDriver({
       streamPrefix: this.node.id + 'Adminer',
       logGroup: new logs.LogGroup(this, 'AdminerLogGroup', {
@@ -66,7 +69,7 @@ export class AdminerSsoStack extends cdk.Stack {
       taskDefinition: adminerTaskDefinition,
     });
     adminerFargateService.connections.allowFromAnyIpv4(ec2.Port.allTcp());
-    adminerFargateService.autoScaleTaskCount({ minCapacity: 2, maxCapacity: 5 });
+    adminerFargateService.autoScaleTaskCount({ minCapacity: 1, maxCapacity: 1 });
     const adminerListener = adminerLoadBalancer.addListener('AdminerListener', {
       port: 9000,
     });
@@ -82,7 +85,10 @@ export class AdminerSsoStack extends cdk.Stack {
       vpc: vpc,
       internetFacing: true,
     });
-    const vouchTaskDefinition = new ecs.FargateTaskDefinition(this, 'VouchTaskDef', {});
+    const vouchTaskDefinition = new ecs.FargateTaskDefinition(this, 'VouchTaskDef', {
+      memoryLimitMiB: 1024,
+      cpu: 512,
+    });
     const vouchLogDriver = new ecs.AwsLogDriver({
       streamPrefix: this.node.id + 'Vouch',
       logGroup: new logs.LogGroup(this, 'VouchLogGroup', {
@@ -100,7 +106,7 @@ export class AdminerSsoStack extends cdk.Stack {
       taskDefinition: vouchTaskDefinition,
     });
     vouchFargateService.connections.allowFromAnyIpv4(ec2.Port.allTcp());
-    vouchFargateService.autoScaleTaskCount({ minCapacity: 2, maxCapacity: 5 });
+    vouchFargateService.autoScaleTaskCount({ minCapacity: 1, maxCapacity: 1 });
     const vouchListener = vouchLoadBalancer.addListener('VouchListener', {
       protocol: elbv2.ApplicationProtocol.HTTPS,
       port: 443,
@@ -148,7 +154,7 @@ export class AdminerSsoStack extends cdk.Stack {
       cluster: cluster,
       taskDefinition: nginxTaskDefinition
     });
-    nginxFargateService.autoScaleTaskCount({ minCapacity: 2, maxCapacity: 5 });
+    nginxFargateService.autoScaleTaskCount({ minCapacity: 1, maxCapacity: 5 });
     nginxListener.addTargets('NginxTarget', {
       port: 80,
       healthCheck: {
@@ -166,5 +172,9 @@ export class AdminerSsoStack extends cdk.Stack {
       recordName: props.vouchSubDomainName,
       domainName: vouchLoadBalancer.loadBalancerDnsName
     });
+
+    const dbSg = ec2.SecurityGroup.fromSecurityGroupId(this, 'vasDBSecurityGroup', 'sg-xxxxx');
+    dbSg.connections.allowFrom(adminerFargateService, ec2.Port.tcp(3306), 'Ingress from Adminer');
+
   }
 }
