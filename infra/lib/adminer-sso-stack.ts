@@ -154,7 +154,7 @@ export class AdminerSsoStack extends cdk.Stack {
       cluster: cluster,
       taskDefinition: nginxTaskDefinition
     });
-    nginxFargateService.autoScaleTaskCount({ minCapacity: 1, maxCapacity: 5 });
+    nginxFargateService.autoScaleTaskCount({ minCapacity: 1, maxCapacity: 1 });
     nginxListener.addTargets('NginxTarget', {
       port: 80,
       healthCheck: {
