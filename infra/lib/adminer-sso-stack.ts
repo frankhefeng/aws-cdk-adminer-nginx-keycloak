@@ -45,7 +45,7 @@ export class AdminerSsoStack extends cdk.Stack {
     const cert = acm.Certificate.fromCertificateArn(this, 'AdminerCert', props.acmARN);
 
     //Adminer
-    const adminerLoadBalancer = new elbv2.NetworkLoadBalancer(this, 'AdminerLoadBalancer', {
+    const adminerLoadBalancer = new elbv2.ApplicationLoadBalancer(this, 'AdminerLoadBalancer', {
       vpc: vpc,
     });
     const adminerTaskDefinition = new ecs.FargateTaskDefinition(this, 'AdminerTaskDef', {
@@ -60,10 +60,10 @@ export class AdminerSsoStack extends cdk.Stack {
       })
     });
     const adminerContainer = adminerTaskDefinition.addContainer('AdminerContainer', {
-      image: ecs.ContainerImage.fromRegistry('adminer:fastcgi'),
+      image: ecs.ContainerImage.fromRegistry('adminer:latest'),
       logging: adminerLogDriver,
     });
-    adminerContainer.addPortMappings({ containerPort: 9000 });
+    adminerContainer.addPortMappings({ containerPort: 8080 });
     const adminerFargateService = new ecs.FargateService(this, 'AdminerService', {
       cluster: cluster,
       taskDefinition: adminerTaskDefinition,
@@ -71,12 +71,13 @@ export class AdminerSsoStack extends cdk.Stack {
     adminerFargateService.connections.allowFromAnyIpv4(ec2.Port.allTcp());
     adminerFargateService.autoScaleTaskCount({ minCapacity: 1, maxCapacity: 1 });
     const adminerListener = adminerLoadBalancer.addListener('AdminerListener', {
-      port: 9000,
+      port: 8080,
     });
     adminerListener.addTargets('AdminerTarget', {
-      port: 9000,
+      port: 8080,
+      protocol: elbv2.ApplicationProtocol.HTTP,
       healthCheck: {
-        protocol: elbv2.Protocol.TCP
+        path: '/adminer'
       }
     }).addTarget(adminerFargateService);
 
